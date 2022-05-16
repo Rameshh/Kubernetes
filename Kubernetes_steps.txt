@@ -94,3 +94,85 @@ Container + Orchestration
   Another way to do this is to save the YAML definition to a file and modify
   kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml
   
+* Manual Scheduling
+  In yam file need to specify as below to manual schedule.
+  nodeName: node01(Provide the node name to schedule)
+  kubectl create -f nginx.yaml
+  kubectl replace --force -f nginx.yaml
+  kubectl get pods --watch
+  kubectl get pods -o wide
+  
+* Labels and selectors
+  kubectl get pods --selector env=dev
+  kubectl get pods --selector bu=finance
+  kubectl get pods --selector bu=finance --no-headers | wc -l
+  kubectl get pods --selector env=prod
+  kubectl get all --selector env=prod --no-headers | wc -l
+  kubectl get pods --selector env=prod,bu=finance,tier=frontend
+  
+* Taints and Tolerations
+  Taints are nodes
+  Tolerations are pods
+  kubectl describe node node01
+  kubectl describe node node01 | grep -i Taints
+  Create a taint on node01 with key of spray, value of mortein and effect of NoSchedule.
+  kubectl taint node node01 spray=mortein:NoSchedule
+  Create a new pod with the nginx image and pod name as mosquito.
+  kubectl run mosquito --image=nginx
+  Create another pod named bee with the nginx image, which has a toleration set to the taint mortein.
+  kubectl run bee --image=nginx --dry-run=client -o yaml
+  kubectl run bee --image=nginx --dry-run=client -o yaml > bee.yaml
+  Open the bee.yaml and paste below containt
+  tolerations:
+  - key: spray
+    value: mortein
+    effect: NoSchedule
+    operator: Equal
+  kubectl create -f bee.yaml
+  Remove the taint on controlplane, which currently has the taint effect of NoSchedule.
+  kubectl taint nodes controlplane node-role.kubernetes.io/master:NoSchedule-
+  
+* Node Selectors and Node Affinity
+  kubectl label node node01 color=blue
+  
+* Daemon Sets
+  kubectl get daemonsets
+  kubectl get daemonsets -A
+  kubectl get daemonsets --all-namespaces
+  kubectl describe daemonset kube-flannel-ds --namespace=kube-system
+  
+* Static PODs
+  kubectl get pods -A
+  kubectl get pods --all-namespaces -o wide
+  
+* Monitoring Cluster Components
+  kubectl top node
+  kubectl top pods
+  
+* Managing Applications logs
+  kubectl logs -f pod name
+  
+* Rolling Updates and Rollback
+* Commands and Arguments
+  command: ["sleep", "5"]
+  
+* Configuring and configmaps
+  kubectl get configmaps
+  Create a new ConfigMap for the webapp-color POD. Use the spec given below.
+  kubectl create configmap webapp-config-map --from-literal=APP_COLOR=darkblue
+  kubectl replace --force -f webapp-color.yaml
+  
+* Configure Secrets in Applications
+  kubectl get secrets
+  kubectl describe secrets
+  kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+  kubectl replace --force -f yaml file
+  
+* Multicontainer pods
+  kubectl run yellow --image=busybox --dry-run=client -o yaml
+  kubectl run yellow --image=busybox --dry-run=client -o yaml > yellow.yaml
+  
+* Init Containers
+  Identify the pod that has an initContainer configured.
+  kubectl describe pod
+   
