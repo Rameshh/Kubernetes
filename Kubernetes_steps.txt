@@ -175,4 +175,84 @@ Container + Orchestration
 * Init Containers
   Identify the pod that has an initContainer configured.
   kubectl describe pod
-   
+  
+* Operating System Upgrade
+  kubectl drain node01
+  kubectl uncordon node01
+  kubectl cordon node01
+  
+* Cluster upgrade process
+  kubeadm upgrade plan
+  kubeadm upgrade apply
+  kubectl drain controlplane --ignore-daemonsets
+  
+  Upgrade the controlplane components to exact version v1.20.0, Upgrade kubeadm tool (if not already), then the master components, 
+  and finally the kubelet.Practice referring to the kubernetes documentation page. Note: While upgrading kubelet, 
+  if you hit dependency issue while running the apt-get upgrade kubelet command, use the apt install kubelet=1.20.0-00 command instead
+  apt update
+  apt install kubeadm=1.20.0-00
+  kubeadm upgrade apply v1.20.0
+  apt install kubelet=1.20.0-00
+  systemctl restart kubelet
+  
+  kubectl uncordon controlplane
+  kubectl drain node01 --ignore-daemonsets
+  
+* Backup and Restore Method
+  kubectl get deploy
+  
+* View Certificate Details
+  Identify the certificate file used for the kube-api server
+  cat /etc/kubernetes/manifests/kube-apiserver.yaml
+  
+* TLS in kubernetes-certificate creation
+  Generate key:
+  openssl genrsa -out ca.key 2048
+  Certificate Signing Request:
+  openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+  Sign Certificate:
+  openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt
+  The same way we can create certificates for KUBE SCHEDULER, KUBE CONTROLLER MANAGER and KUBE PROXY.
+  
+* View Certificate Details
+  kubectl get csr
+  kubectl certificate approve name
+  kubectl certificate deny name
+  kubectl delete csr name
+  
+* API Groups
+  curl https://kube-master:6443/version
+  curl https://kube-master:6443/api/v1/pods
+  kube proxy is not equal to kubectl proxy 
+
+* Authorization
+  why, mechanism, ABAC, RBAC and webhook
+  ABAC: Attribute-base access control
+  
+* RBAC(Role Based Access Control)
+  To view RBAC
+  kubectl get roles
+  kubectl get rolebindings
+  kubectl describe role developer
+  
+  To Check Access
+  kubectl auth can-i create deployments
+  kubectl auth can-i delete nodes
+  kubectl auth can-i create deployments --as dev-user
+  kubectl auth can-i create pods --as dev-user
+  
+* Cluster Roles and Role Bindings
+  kubectl get clusterroles --no-headers | wc -l
+  kubectl get clusterrolesbindings --no-headers | wc -l
+  kubectl describe clusterrole cluster-admin
+  
+* Service Accounts
+  User: used by humans.
+  Service: used by machines
+  kubectl create serivceaccount dashboard-sa
+  kubectl get serviceaccount
+  
+* Image Security
+  image:docker.io/library/nginx
+  
+* 
